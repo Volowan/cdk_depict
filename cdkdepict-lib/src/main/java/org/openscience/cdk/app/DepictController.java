@@ -91,18 +91,35 @@ public class DepictController {
 
   private Color[] COLORS = new Color[]{
           new Color(0xe6194b),
-          new Color(0x3cb44b),
-          new Color(0xffe119),
-          new Color(0x0082c8),
-          new Color(0xf58231),
-          new Color(0x911eb4),
-          new Color(0x46f0f0),
+          new Color(0xfed06a),/*1st color in molecule colormap LIAC*/
+          new Color(0xf7ab7f),/*2nd color in molecule colormap LIAC*/
+          new Color(0xe58b95),/*3rd color in molecule colormap LIAC*/
+          new Color(0xce6fac),/*4th color in molecule colormap LIAC*/
+          new Color(0xc484d1),/*5th color in molecule colormap LIAC*/
+          new Color(0xa980d0),/*6th color in molecule colormap LIAC*/
+          new Color(0xa9c7ff),
+          new Color(0xb9ffb4),
+          new Color(0xe3e3e3),
+          new Color(0x828282),
+          new Color(0x008080),
+          new Color(0xaa6e28),
+          new Color(0xe6194b),/* repeat once here */
+          new Color(0xfed06a),
+          new Color(0xf7ab7f),
+          new Color(0xe58b95),
+          new Color(0xce6fac),
+          new Color(0xc484d1),
+          new Color(0xa980d0),
+          new Color(0xa9c7ff),
+          new Color(0xb9ffb4),
+          new Color(0xe3e3e3),
+          new Color(0x828282),
+          new Color(0x008080),
+          new Color(0xaa6e28),
           new Color(0xf032e6),
           new Color(0xd2f53c),
           new Color(0xfabebe),
-          new Color(0x008080),
           new Color(0xe6beff),
-          new Color(0xaa6e28),
           new Color(0xfffac8),
           new Color(0x800000),
           new Color(0xaaffc3),
@@ -111,6 +128,7 @@ public class DepictController {
           new Color(0x000080),
           new Color(0x808080),
           new Color(0xE3E3E3),
+          new Color(0xe6194b),
           new Color(0x000000)
   };
 
@@ -294,11 +312,11 @@ public class DepictController {
     DepictionGenerator myGenerator = generator.withSize(getDouble(Param.WIDTH, extra),
                                                         getDouble(Param.HEIGHT, extra))
                                               .withZoom(getDouble(Param.ZOOM, extra));
-
+  
     // Configure style preset
     myGenerator = withStyle(myGenerator, style);
     myGenerator = withBgFgColors(extra, myGenerator);
-    myGenerator = myGenerator.withAnnotationScale(0.7)
+    myGenerator = myGenerator.withAnnotationScale(1.0)
                              .withAnnotationColor(Color.RED);
     myGenerator = myGenerator.withParam(StandardGenerator.StrokeRatio.class, getDouble(Param.RATIO, extra));
 
@@ -398,21 +416,34 @@ public class DepictController {
         break;
       case "colmap":
         if (isRxn) {
-          myGenerator = myGenerator.withAtomMapHighlight(new Color[]{new Color(169, 199, 255),
+          myGenerator = myGenerator.withAtomMapHighlight(new Color[]{new Color(254,208,106),
+                                           new Color(247,171,127),
+                                           new Color(229,139,149),
+                                           new Color(206,111,172),
+                                           new Color(196,132,209),
+                                           new Color(169,128,208),
+                                           new Color(169, 199, 255),
                                            new Color(185, 255, 180),
+                                           new Color(227, 227, 227),
+                                           new Color(130, 130, 130),
                                            new Color(255, 162, 162),
                                            new Color(253, 139, 255),
-                                           new Color(255, 206, 86),
-                                           new Color(227, 227, 227)})
+                                           new Color(255, 206, 86)})
                                    .withOuterGlowHighlight(6d);
         } else {
-          myGenerator = myGenerator.withOuterGlowHighlight();
+          myGenerator = myGenerator.withOuterGlowHighlight();/*Here seems to be for colormap of lone molecules */
           myGenerator = myGenerator.withParam(StandardGenerator.Visibility.class,
                                               SymbolVisibility.iupacRecommendationsWithoutTerminalCarbon());
           for (IAtom atom : mol.atoms()) {
             Integer mapidx = atom.getProperty(CDKConstants.ATOM_ATOM_MAPPING);
             if (mapidx != null && mapidx < COLORS.length)
-              atom.setProperty(StandardGenerator.HIGHLIGHT_COLOR, COLORS[mapidx]);
+              atom.setProperty(StandardGenerator.HIGHLIGHT_COLOR, COLORS[mapidx]);            
+          }
+          for (IBond bond : mol.bonds()) {
+            if (bond.getBegin().getProperty(CDKConstants.ATOM_ATOM_MAPPING)!= null && bond.getBegin().getProperty(CDKConstants.ATOM_ATOM_MAPPING) == bond.getEnd().getProperty(CDKConstants.ATOM_ATOM_MAPPING)) {
+              Integer mapidx = bond.getBegin().getProperty(CDKConstants.ATOM_ATOM_MAPPING);
+              bond.setProperty(StandardGenerator.HIGHLIGHT_COLOR, COLORS[mapidx]);
+            }
           }
         }
         break;
